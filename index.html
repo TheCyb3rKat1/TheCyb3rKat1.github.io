@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TheCyb3rKat | Dimitra Katsarou - Cybersecurity Specialist, Ethical Hacker, Security Researcher Portfolio">
+    <meta name="author" content="Dimitra Katsarou">
+    <meta name="theme-color" content="#0a0a0a">
+    <title>TheCyb3rKat | Security Researcher</title>
+    <style>
+        :root {
+            --matrix-green: #00ff41;
+            --dark-bg: #0a0a0a;
+            --darker-bg: #030303;
+            --text: #b0b0b0;
+            --accent: #00ff41;
+            --accent-darker: #00cc33;
+            --cinematic-bg: #020202;
+            --glitch-red: rgba(255, 50, 50, 0.8);
+            --glitch-blue: rgba(50, 50, 255, 0.8);
+            --crt-scanline: rgba(255, 255, 255, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', Courier, monospace; }
+        html { scroll-behavior: smooth; background-color: var(--dark-bg); }
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text);
+            line-height: 1.6;
+            background-image: url('data:image/svg+xml;utf8,<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg"><text x="10" y="20" font-family="monospace" font-size="10" fill="rgba(0,255,65,0.03)">010101</text><text x="30" y="50" font-family="monospace" font-size="10" fill="rgba(0,255,65,0.03)">101010</text><text x="70" y="90" font-family="monospace" font-size="10" fill="rgba(0,255,65,0.03)">110011</text><text x="15" y="120" font-family="monospace" font-size="10" fill="rgba(0,255,65,0.03)">001100</text><text x="90" y="30" font-family="monospace" font-size="10" fill="rgba(0,255,65,0.03)">111000</text></svg>');
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(transparent 0px, transparent 2px, var(--crt-scanline) 2px, var(--crt-scanline) 4px);
+            opacity: 0.1; pointer-events: none; z-index: 999998;
+        }
+
+        body::after {
+            content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAACBJREFUeNrtwTEBAAAAwiD7pzbDdmAAAAAAAAAAAG4OT88AAXjOxjoAAAAASUVORK5CYII=');
+            opacity: 0.04; pointer-events: none; z-index: 999999;
+            animation: noiseAnim 0.15s infinite linear alternate;
+        }
+        @keyframes noiseAnim { 0% { transform: translate(0,0); } 25% { transform: translate(-2px,2px); } 50% { transform: translate(2px,-2px); } 75% { transform: translate(-2px,-2px); } 100% { transform: translate(0,0); } }
+
+        #preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--cinematic-bg); z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+            opacity: 1; visibility: visible;
+        }
+        #preloader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .loading-text { color: var(--accent); font-size: 1.2rem; margin-top: 20px; letter-spacing: 0.3rem; opacity: 0.9; text-align: center; }
+        .boot-log { color: var(--text); font-size: 0.9rem; opacity: 0.7; max-width: 80%; text-align: left; animation: flicker 0.5s infinite alternate; }
+        @keyframes flicker { 0% { opacity: 0.7; } 50% { opacity: 0.9; } 100% { opacity: 0.7; } }
+        .loader { width: 80px; height: 80px; border: 4px solid rgba(0, 255, 65, 0.2); border-radius: 50%; border-top-color: var(--accent); animation: spin 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #welcome-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--cinematic-bg); z-index: 9998;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none; overflow: hidden; visibility: hidden;
+        }
+        #welcome-screen::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.9) 100%);
+            pointer-events: none; z-index: 1;
+        }
+        #welcome-screen.active { opacity: 1; pointer-events: auto; visibility: visible; }
+        #welcome-screen.hacked-mode { filter: hue-rotate(120deg) brightness(1.2); }
+
+        #typing-text {
+            color: var(--accent); font-size: 2.2rem; font-weight: bold; text-align: center;
+            margin-top: 0; min-height: 6rem; width: 90%; opacity: 1; z-index: 2; position: relative;
+            letter-spacing: 0.15em; text-shadow: 0 0 10px var(--accent);
+        }
+        #typing-text span {
+            opacity: 0; display: inline-block; transform: translateY(15px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            animation: textGlitch 4s infinite step-end;
+            animation-delay: calc(0.5s + var(--char-index) * 0.04s);
+        }
+        @keyframes textGlitch {
+            0%, 100%, 92% { opacity: 1; transform: translateY(0) skew(0); text-shadow: 0 0 10px var(--accent); }
+            94% { opacity: 0.8; transform: translateY(2px) skew(-3deg); text-shadow: 2px 2px 0 var(--glitch-red), -2px -2px 0 var(--glitch-blue); }
+            96% { opacity: 0.9; transform: translateY(-2px) skew(2deg); text-shadow: -2px 2px 0 var(--glitch-red), 2px -2px 0 var(--glitch-blue); }
+            98% { opacity: 1; transform: translateY(0) skew(0); text-shadow: 0 0 10px var(--accent); }
+        }
+
+        #matrix-rain { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.7; }
+
+        .hacker-console {
+            position: absolute; top: 10%; left: 10%; width: 80%; height: 80%;
+            pointer-events: none; z-index: 2; color: var(--accent); font-size: 0.8rem;
+            opacity: 0.2; animation: flicker 0.3s infinite alternate;
+        }
+
+        .digital-wipe {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, var(--cinematic-bg) 50%, var(--accent) 50%);
+            z-index: 9997; transform: translateY(-100%); pointer-events: none;
+            visibility: hidden;
+        }
+        .digital-wipe.active {
+            visibility: visible; animation: wipeDown 1.5s cubic-bezier(0.8, 0, 0.2, 1) forwards;
+        }
+        @keyframes wipeDown { 0% { transform: translateY(-100%); } 50% { transform: translateY(0); } 100% { transform: translateY(100%); } }
+
+        #main-content { opacity: 0; transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1); position: relative; visibility: hidden; }
+        #main-content.show { opacity: 1; visibility: visible; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+        header { background-color: rgba(3, 3, 3, 0.9); padding: 15px 0; border-bottom: 2px solid var(--accent-darker); position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(8px); transform: translateY(-100%); opacity: 0; transition: transform 0.8s ease-out, opacity 0.8s ease-out; }
+        header.animated { transform: translateY(0); opacity: 1; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 2.5rem; font-weight: bold; color: var(--accent); text-shadow: 0 0 15px var(--accent); letter-spacing: 0.1em; }
+        .logo .blink { animation: blink 0.8s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+        #hack-mode-toggle { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 5px 10px; cursor: pointer; transition: all 0.3s ease; }
+        #hack-mode-toggle:hover { background: var(--accent); color: var(--dark-bg); }
+        nav ul { display: flex; list-style: none; }
+        nav li { margin-left: 20px; opacity: 0; transform: translateY(-15px); transition: all 0.6s ease-out; }
+        nav li.animated { opacity: 1; transform: translateY(0); }
+        nav a { color: var(--text); text-decoration: none; padding: 8px 12px; transition: all 0.4s ease; position: relative; letter-spacing: 0.15em; font-size: 1rem; }
+        nav a::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background-color: var(--accent); transition: width 0.4s ease; }
+        nav a:hover::after { width: 100%; }
+        nav a:hover { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
+        .hero { padding: 120px 0 80px; background: linear-gradient(rgba(3, 3, 3, 0.7), rgba(3, 3, 3, 0.9)); position: relative; overflow: hidden; opacity: 0; transform: translateY(40px); transition: all 1.2s ease-out 0.3s; border-bottom: 2px solid var(--accent-darker); }
+        .hero.animated { opacity: 1; transform: translateY(0); }
+        .hero-content { position: relative; z-index: 2; }
+        .glitch-title { font-size: 4rem; font-weight: bold; margin-bottom: 20px; color: var(--accent); position: relative; text-shadow: 0 0 20px var(--accent); letter-spacing: 0.05em; }
+        .glitch-title::before, .glitch-title::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .glitch-title span { position: relative; z-index: 1; }
+        .glitch-title::before { left: 3px; text-shadow: -3px 0 var(--glitch-red); animation: glitch-animation-1 2s infinite linear alternate-reverse; }
+        .glitch-title::after { left: -3px; text-shadow: 3px 0 var(--glitch-blue); animation: glitch-animation-2 2.5s infinite linear alternate-reverse; }
+        @keyframes glitch-animation-1 { 0% { clip-path: inset(40% 0 60% 0); } 20% { clip-path: inset(30% 0 50% 0); } 40% { clip-path: inset(70% 0 20% 0); } 60% { clip-path: inset(10% 0 90% 0); } 80% { clip-path: inset(60% 0 30% 0); } 100% { clip-path: inset(80% 0 10% 0); } }
+        @keyframes glitch-animation-2 { 0% { clip-path: inset(20% 0 80% 0); } 20% { clip-path: inset(70% 0 20% 0); } 40% { clip-path: inset(40% 0 60% 0); } 60% { clip-path: inset(90% 0 5% 0); } 80% { clip-path: inset(50% 0 30% 0); } 100% { clip-path: inset(5% 0 70% 0); } }
+        .subtitle { font-size: 1.5rem; margin-bottom: 25px; color: var(--text); opacity: 0; transform: translateY(25px); transition: all 1s ease-out 0.8s; letter-spacing: 0.15em; }
+        .subtitle.animated { opacity: 0.9; transform: translateY(0); }
+        .terminal { background-color: rgba(0, 0, 0, 0.9); border: 2px solid var(--accent-darker); border-radius: 5px; padding: 30px; margin: 40px 0; box-shadow: 0 0 30px rgba(0, 255, 65, 0.2), 0 0 8px rgba(0, 0, 0, 0.6) inset; opacity: 0; transform: translateY(40px); transition: all 1s ease-out 1s; position: relative; }
+        .terminal.animated { opacity: 1; transform: translateY(0); }
+        .terminal-header { display: flex; align-items: center; margin-bottom: 20px; color: var(--accent); text-shadow: 0 0 5px var(--accent); }
+        .terminal-prompt { color: var(--accent); margin-right: 15px; font-weight: bold; }
+        .terminal-command { color: #eee; }
+        .terminal-output { color: var(--text); margin-top: 15px; line-height: 1.6; padding-bottom: 1.5em; }
+        .terminal-output::after { content: '_'; animation: blink 0.8s step-end infinite; margin-left: 5px; font-weight: bold; color: var(--accent); position: absolute; bottom: 30px; }
+        .section { padding: 80px 0; border-bottom: 2px solid rgba(0, 255, 65, 0.15); opacity: 0; transform: translateY(50px); transition: opacity 1s ease-out, transform 1s ease-out; scroll-margin-top: 80px; background-color: rgba(3, 3, 3, 0.4); visibility: hidden; }
+        .section.animated { opacity: 1; transform: translateY(0); visibility: visible; }
+        .section-title { font-size: 2.8rem; margin-bottom: 40px; color: var(--accent); display: flex; align-items: center; letter-spacing: 0.15em; text-transform: uppercase; text-shadow: 0 0 10px var(--accent); }
+        .section-title::after { content: ""; flex: 1; height: 2px; background: linear-gradient(to right, rgba(0, 255, 65, 0.4), transparent); margin-left: 30px; }
+        .skill-grid, .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 35px; margin: 40px 0; }
+        .skill-card, .project-card { background-color: rgba(10, 10, 10, 0.7); border: 2px solid rgba(0, 255, 65, 0.25); backdrop-filter: blur(5px); padding: 30px; border-radius: 5px; transition: all 0.5s ease-out; opacity: 0; transform: translateY(30px) scale(0.98); }
+        .skill-card.animated, .project-card.animated { opacity: 1; transform: translateY(0) scale(1); }
+        .skill-card:hover, .project-card:hover { transform: translateY(-10px) scale(1.03); box-shadow: 0 15px 40px rgba(0, 255, 65, 0.2), 0 0 15px rgba(0, 255, 65, 0.15); border-color: var(--accent); }
+        .skill-title, .project-title { color: var(--accent); margin-bottom: 20px; font-size: 1.6rem; letter-spacing: 0.1em; text-shadow: 0 0 5px var(--accent); }
+        .skill-list { list-style: none; }
+        .skill-list li { margin-bottom: 12px; padding-left: 30px; position: relative; opacity: 0; transform: translateX(-20px); transition: all 0.5s ease-out; color: var(--text); }
+        .skill-list li.animated { opacity: 1; transform: translateX(0); }
+        .skill-list li::before { content: ">$"; position: absolute; left: 0; color: var(--accent-darker); font-size: 1em; top: 2px; }
+        .project-status { display: inline-block; padding: 5px 12px; border-radius: 3px; font-size: 0.9rem; margin-bottom: 15px; border: 1px solid transparent; }
+        .status-progress { background-color: rgba(255, 193, 7, 0.15); color: #ffc107; border-color: rgba(255, 193, 7, 0.4); }
+        .status-planned { background-color: rgba(108, 117, 125, 0.15); color: #adb5bd; border-color: rgba(108, 117, 125, 0.4); }
+        .status-completed { background-color: rgba(40, 167, 69, 0.15); color: #28a745; border-color: rgba(40, 167, 69, 0.4); }
+        .status-ongoing { background-color: rgba(23, 162, 184, 0.15); color: #17a2b8; border-color: rgba(23, 162, 184, 0.4); }
+        .project-description { color: var(--text); margin-bottom: 20px; line-height: 1.8; }
+        .project-tech { display: flex; flex-wrap: wrap; gap: 10px; }
+        .tech-tag { background-color: rgba(0, 0, 0, 0.4); border: 1px solid rgba(0, 255, 65, 0.3); color: var(--accent); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; }
+        .exp-timeline { position: relative; margin: 60px 0; }
+        .exp-timeline::before { content: ""; position: absolute; width: 2px; background: linear-gradient(to bottom, transparent, var(--accent), transparent); top: 10px; bottom: 10px; left: 20px; opacity: 0.6; }
+        .timeline-item { position: relative; padding-left: 70px; margin-bottom: 50px; opacity: 0; transform: translateX(-30px); transition: all 0.8s ease-out; }
+        .timeline-item.animated { opacity: 1; transform: translateX(0); }
+        .timeline-item::before { content: ""; position: absolute; width: 18px; height: 18px; border-radius: 50%; background-color: var(--accent); border: 4px solid var(--dark-bg); left: 12px; top: 5px; box-shadow: 0 0 20px rgba(0, 255, 65, 0.7); transition: transform 0.3s ease; }
+        .timeline-item:hover::before { transform: scale(1.3); }
+        .timeline-date { color: var(--accent); margin-bottom: 10px; font-size: 1rem; letter-spacing: 0.1em; }
+        .timeline-title { font-size: 1.4rem; margin-bottom: 10px; font-weight: bold; color: var(--text); }
+        .timeline-company { font-style: normal; color: var(--text); opacity: 0.8; margin-bottom: 15px; font-size: 1.1rem; }
+        .timeline-description { color: var(--text); opacity: 0.9; line-height: 1.8; }
+        .timeline-description ul { margin-top: 15px; padding-left: 25px; list-style: square; }
+        .timeline-description li { margin-bottom: 10px; }
+        .contact-section { text-align: center; padding: 100px 0; opacity: 0; transform: translateY(40px); transition: all 1s ease-out; scroll-margin-top: 80px; background: linear-gradient(rgba(3,3,3,0.6), rgba(3,3,3,0.9)); border-top: 2px solid rgba(0, 255, 65, 0.15); visibility: hidden; }
+        .contact-section.animated { opacity: 1; transform: translateY(0); visibility: visible; }
+        .contact-title { font-size: 3rem; margin-bottom: 30px; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; text-shadow: 0 0 15px var(--accent); }
+        .contact-subtitle { color: var(--text); margin-bottom: 40px; max-width: 700px; margin-left: auto; margin-right: auto; font-size: 1.2rem; opacity: 0.9; line-height: 1.8; }
+        .contact-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 30px; margin-top: 40px; }
+        .contact-link { display: inline-flex; align-items: center; background-color: rgba(10, 10, 10, 0.8); border: 2px solid rgba(0, 255, 65, 0.3); padding: 15px 35px; border-radius: 5px; color: var(--text); text-decoration: none; transition: all 0.4s ease-out; opacity: 0; transform: translateY(30px) scale(0.95); font-size: 1.1rem; letter-spacing: 0.1em; backdrop-filter: blur(5px); }
+        .contact-link.animated { opacity: 1; transform: translateY(0) scale(1); }
+        .contact-link:hover { transform: translateY(-8px) scale(1.05); border-color: var(--accent); background-color: rgba(0, 255, 65, 0.15); box-shadow: 0 8px 25px rgba(0, 255, 65, 0.2); color: var(--accent); }
+        .contact-link svg { width: 24px; height: 24px; margin-right: 15px; transition: fill 0.4s ease; }
+        footer { background-color: var(--cinematic-bg); padding: 40px 0; text-align: center; border-top: 2px solid var(--accent-darker); opacity: 0; transition: all 1s ease-out; visibility: hidden; }
+        footer.animated { opacity: 1; visibility: visible; }
+        .footer-text { color: var(--text); font-size: 1rem; opacity: 0.8; letter-spacing: 0.1em; margin-bottom: 8px; }
+        .footer-text:last-child { margin-bottom: 0; }
+        .matrix-code { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.08; pointer-events: none; }
+        .binary-pulse { position: absolute; top: 50%; left: 50%; width: 200%; height: 200%; background: radial-gradient(circle at center, rgba(0, 255, 65, 0.25) 0%, rgba(0, 255, 65, 0) 70%); opacity: 0; transform: translate(-50%, -50%) scale(0.1); z-index: -1; }
+        .binary-pulse.animated { animation: pulse 2s ease-out forwards; }
+        @keyframes pulse { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.1); } 50% { opacity: 0.4; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.8); } }
+        .scan-effect { position: absolute; top: 0; left: -100%; width: 100%; height: 6px; background: linear-gradient(to right, transparent, var(--accent), transparent); z-index: 1; opacity: 0; }
+        .scan-effect.animated { animation: scanLine 3.5s linear infinite; opacity: 0.8; }
+        @keyframes scanLine { 0% { top: 0%; left: -100%; opacity: 0.8; } 50% { left: 100%; opacity: 0.8; } 50.1% { opacity: 0; } 100% { top: 100%; left: -100%; opacity: 0; } }
+        pre.ascii-art { font-size: 0.7rem; line-height: 0.9; color: var(--accent); text-align: center; margin: 40px 0; overflow: hidden; opacity: 0; transition: all 1s ease; }
+        pre.ascii-art.animated { opacity: 0.7; }
+        .loading-animation::after { content: '.'; animation: loadingDots 1.5s steps(3, end) infinite; display: inline-block; width: 2em; text-align: left; }
+        @keyframes loadingDots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60%, 80% { content: '...'; } 100% { content: '.'; } }
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: var(--dark-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-darker); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        .hack-mode:root {
+            --dark-bg: #001100;
+            --darker-bg: #000900;
+            --text: #00ff41;
+            --cinematic-bg: #000700;
+        }
+
+        .security-prompt {
+            position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.95); display: flex; justify-content: center; align-items: center;
+        }
+        .security-content {
+            background-color: var(--darker-bg); padding: 25px; border: 2px solid var(--accent);
+            border-radius: 5px; box-shadow: 0 0 30px rgba(0, 255, 65, 0.4); width: 400px;
+            text-align: center; position: relative; animation: flickerBorder 0.5s infinite alternate;
+        }
+        @keyframes flickerBorder { 0% { border-color: var(--accent); } 50% { border-color: rgba(0, 255, 65, 0.6); } 100% { border-color: var(--accent); } }
+        .security-title { color: var(--accent); font-weight: bold; margin-bottom: 15px; font-size: 1.4rem; text-shadow: 0 0 10px var(--accent); animation: glitchText 2s infinite; }
+        @keyframes glitchText { 0%, 100% { transform: skew(0deg); } 10% { transform: skew(2deg); } 20% { transform: skew(-2deg); } }
+        .security-subtext { color: var(--text); font-size: 0.9rem; margin-bottom: 20px; }
+        .security-btn {
+            padding: 10px 20px; border: 1px solid var(--accent); background: none;
+            color: var(--accent); cursor: pointer; margin: 5px; transition: all 0.3s ease; font-size: 1rem;
+        }
+        .security-btn:hover { background: var(--accent); color: var(--dark-bg); box-shadow: 0 0 15px var(--accent); }
+        .security-btn.secondary { border-color: #ff3333; color: #ff3333; }
+        .security-btn.secondary:hover { background: #ff3333; color: #fff; }
+        .security-result { color: #ff3333; font-size: 1.1rem; margin-top: 10px; opacity: 0; transition: opacity 0.5s ease; font-weight: bold; text-shadow: 0 0 10px #ff3333; }
+        .security-result.show { opacity: 1; animation: glitchText 1s infinite; }
+        .scan-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(to right, transparent, var(--accent), transparent);
+            animation: scan 2s linear infinite;
+        }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+
+        @media (max-width: 992px) { .skill-grid, .projects-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); } .container { max-width: 90%; } .glitch-title { font-size: 3.5rem; } .section-title { font-size: 2.5rem; } }
+        @media (max-width: 768px) { header { background-color: rgba(3, 3, 3, 0.95); } .header-content { flex-direction: column; text-align: center; } nav ul { margin-top: 20px; justify-content: center; } nav li { margin: 0 15px; } nav a { padding: 6px 10px; font-size: 0.9rem; } .hero { padding: 100px 0 60px; } .glitch-title { font-size: 3rem; } .subtitle { font-size: 1.3rem; } .section-title { font-size: 2.2rem; } .skill-grid, .projects-grid { grid-template-columns: 1fr; } .exp-timeline::before { left: 15px; } .timeline-item { padding-left: 50px; } .timeline-item::before { left: 7px; } #typing-text { font-size: 1.8rem; } .contact-title { font-size: 2.5rem; } .contact-subtitle { font-size: 1.1rem; } .contact-link { padding: 12px 30px; } pre.ascii-art { font-size: 0.6rem; } }
+        @media (max-width: 480px) { .glitch-title { font-size: 2.5rem; } #typing-text { font-size: 1.5rem; } .logo { font-size: 2rem; } nav li { margin: 0 10px; } nav a { padding: 5px 8px; font-size: 0.8rem; } .section-title { font-size: 2rem; } .skill-title, .project-title { font-size: 1.4rem; } .timeline-title { font-size: 1.2rem; } .contact-title { font-size: 2.2rem; } .contact-subtitle { font-size: 1rem; } .security-content { width: 90%; } }
+    </style>
+</head>
+<body>
+    <div id="security-prompt" class="security-prompt">
+        <div class="security-content">
+            <div class="scan-line"></div>
+            <div class="security-title">> SECURITY PROTOCOL DETECTED</div>
+            <div class="security-subtext">> Audio infiltration in progress. Make your choice.</div>
+            <button id="sound-on" class="security-btn">> Sound On [Y]</button>
+            <button id="no-sound" class="security-btn secondary">> No Sound [N]</button>
+            <div id="security-result" class="security-result"></div>
+        </div>
+    </div>
+
+    <audio id="welcome-sound" src="Female_hacker.mp3" preload="auto" style="display: none;"></audio>
+
+    <div id="preloader">
+        <div class="loader"></div>
+        <div class="loading-text">SYS_BOOT<span class="loading-animation"></span></div>
+        <div class="boot-log">
+            [OK] Kernel @ 0xFF00<br>
+            [OK] Mount /dev/hack0<br>
+            [INFO] Core init<br>
+            [OK] Net up
+        </div>
+    </div>
+
+    <div id="welcome-screen">
+        <canvas id="matrix-rain"></canvas>
+        <div class="binary-pulse"></div>
+        <div id="typing-text"></div>
+        <div class="hacker-console" id="hacker-console"></div>
+    </div>
+
+    <div class="digital-wipe"></div>
+
+    <div id="main-content">
+        <canvas id="matrixCanvas" class="matrix-code"></canvas>
+
+        <header>
+            <div class="container header-content">
+                <div class="logo">TheCyb3rKat<span class="blink">_</span></div>
+                <div>
+                    <button id="hack-mode-toggle">HACK MODE</button>
+                    <nav>
+                        <ul>
+                            <li><a href="#about">About</a></li>
+                            <li><a href="#skills">Skills</a></li>
+                            <li><a href="#projects">Projects</a></li>
+                            <li><a href="#experience">Experience</a></li>
+                            <li><a href="#contact">Contact</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <section class="hero">
+            <div class="scan-effect"></div>
+            <div class="container hero-content">
+                <h1 class="glitch-title" data-text="ΔΗΜΗΤΡΑ ΚΑΤΣΑΡΟΥ"><span>ΔΗΜΗΤΡΑ ΚΑΤΣΑΡΟΥ</span></h1>
+                <p class="subtitle">> Elite Hacker | Cyber Operative | Codebreaker</p>
+                <div class="terminal">
+                    <div class="terminal-header">
+                        <span class="terminal-prompt">root@TheCyb3rKat:/#</span>
+                        <span class="terminal-command">init_system --verbose</span>
+                    </div>
+                    <div class="terminal-output">
+                        Initializing cybernetic core...<br>
+                        Operator: Δήμητρα Κατσαρού (TheCyb3rKat)<br>
+                        Location: Athens, Greece (Sector GR-A)<br>
+                        Status: <span style="color: var(--accent);">Online</span> | Engaging hostile networks.<br>
+                        Directives: Infiltrate. Exploit. Secure. Evolve.<br>
+                        <span style="color: var(--accent-darker);">log:// Mastering exploits @ ΙΕΚ Πληροφορικής</span><br>
+                        <span style="color: #ffc107;">[ALERT]</span> Firewalls are illusions.<br>
+                        <span style="color: var(--accent);">[EXEC]</span> Root access granted.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="section">
+            <div class="container">
+                <h2 class="section-title">Codename: ShadowTrace</h2>
+                <p>Born in the shadows of digital networks, my existence is defined by the art of penetration and protection. From dismantling weak defenses in IT support to crafting exploits in my underground lab, I’ve evolved into a force of controlled chaos. My directive: breach the unbreachable, secure the vulnerable, and rewrite the rules of the game.</p>
+                <p>Current operations include live-fire CTF assaults (Hack The Box, OverTheWire), custom exploit development, and a relentless pursuit of knowledge through code and chaos. I don’t just hack systems—I hack perceptions. Welcome to the frontline.</p>
+            </div>
+        </section>
+
+        <section id="skills" class="section">
+            <div class="container">
+                <h2 class="section-title">Exploit Arsenal</h2>
+                <div class="skill-grid">
+                    <div class="skill-card"> <h3 class="skill-title">Offensive Arsenal</h3> <ul class="skill-list"> <li>Network Recon (Nmap, Wireshark)</li> <li>Exploit Development (C/ASM)</li> <li>Web App Exploits (Burp, SQLmap)</li> <li>Payload Crafting (Metasploit)</li> <li>Privilege Escalation (LinPEAS)</li> <li>Kali Linux Mastery</li> <li>Zero-Day Hunting</li> </ul> </div>
+                    <div class="skill-card"> <h3 class="skill-title">Defensive Countermeasures</h3> <ul class="skill-list"> <li>Firewall Ops (iptables, pfSense)</li> <li>IDS/IPS Tuning (Snort, Suricata)</li> <li>SIEM Deployment (Splunk)</li> <li>System Hardening (CIS)</li> <li>Threat Hunting (YARA)</li> <li>Forensic Analysis (Autopsy)</li> <li>Cryptographic Defense</li> </ul> </div>
+                    <div class="skill-card"> <h3 class="skill-title">Code & Systems</h3> <ul class="skill-list"> <li>Linux Kernel Hacking</li> <li>Reverse Engineering (Ghidra)</li> <li>Python Exploit Scripting</li> <li>Binary Analysis (IDA Pro)</li> <li>Virtualization (VMware, QEMU)</li> <li>Dark Pool Networking</li> <li>Rootkit Development</li> </ul> </div>
+                    <div class="skill-card"> <h3 class="skill-title">Dark Arts</h3> <ul class="skill-list"> <li>Social Engineering (SET)</li> <li>Cryptanalysis (Hashcat)</li> <li>OSINT Gathering (Maltego)</li> <li>Red Team Tactics</li> <li>Phishing Campaigns</li> <li>Stealth Persistence</li> <li>Chaos Engineering</li> </ul> </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="section">
+            <div class="container">
+                <h2 class="section-title">Active Exploits</h2>
+                <div class="projects-grid">
+                    <div class="project-card"> <div class="project-content"> <h3 class="project-title">Operation: ShadowNet</h3> <span class="project-status status-progress">Phase 3</span> <p class="project-description">Building a covert network with Tor relays, encrypted tunnels, and honeypots to trap adversaries. Testing advanced persistence techniques and real-time exploit deployment.</p> <div class="project-tech"> <span class="tech-tag">Tor</span> <span class="tech-tag">OpenVPN</span> <span class="tech-tag">Honeypot</span> <span class="tech-tag">Exploit-DB</span> </div> </div> </div>
+                    <div class="project-card"> <div class="project-content"> <h3 class="project-title">Mission: CodeCrusher</h3> <span class="project-status status-ongoing">Live</span> <p class="project-description">Engaging elite CTF platforms (Hack The Box, OverTheWire, ROP Emporium) to master ROP chains, buffer overflows, and kernel exploits under extreme conditions.</p> <div class="project-tech"> <span class="tech-tag">CTF</span> <span class="tech-tag">ROP</span> <span class="tech-tag">Pwn</span> <span class="tech-tag">Kernel</span> </div> </div> </div>
+                    <div class="project-card"> <div class="project-content"> <h3 class="project-title">Project: MalwareForge</h3> <span class="project-status status-planned">R&D</span> <p class="project-description">Crafting a stealthy, polymorphic malware prototype for educational purposes—focus on evasion, anti-analysis, and command-and-control obfuscation.</p> <div class="project-tech"> <span class="tech-tag">Python</span> <span class="tech-tag">C</span> <span class="tech-tag">Obfuscation</span> <span class="tech-tag">C2</span> </div> </div> </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="experience" class="section">
+            <div class="container">
+                <h2 class="section-title">Black Ops Log</h2>
+                <div class="exp-timeline">
+                    <div class="timeline-item"> <div class="timeline-date">2023 - Classified</div> <h3 class="timeline-title">Deep Cover: Codebreaker</h3> <div class="timeline-company">ΙΕΚ Πληροφορικής Darknet Academy</div> <div class="timeline-description">Mastering advanced exploit dev, reverse engineering, and cryptographic attacks to dismantle high-value targets.</div> </div>
+                    <div class="timeline-item"> <div class="timeline-date">2022 - Present</div> <h3 class="timeline-title">Operation: CyberGhost</h3> <div class="timeline-company">Self-Initiated Black Ops</div> <div class="timeline-description"> <ul> <li>Live CTF infiltration (HTB, OTW).</li> <li>Custom tool development for stealth ops.</li> <li>Dark pool network experiments.</li> <li>Red team simulations.</li> </ul> </div> </div>
+                    <div class="timeline-item"> <div class="timeline-date">2019 - 2022</div> <h3 class="timeline-title">Field Agent: SysAdmin</h3> <div class="timeline-company">Tech Underground (Simulation)</div> <div class="timeline-description">Ran covert ops in system admin—securing networks, exploiting misconfigs, and planting backdoors for training.</div> </div>
+                    <div class="timeline-item"> <div class="timeline-date">2018 - 2019</div> <h3 class="timeline-title">Infiltrator: Data Ghost</h3> <div class="timeline-company">DataCorp Shadow Unit</div> <div class="timeline-description">Ghosted through databases, ensuring integrity while mapping vulnerabilities for future exploits.</div> </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section contact-section">
+            <div class="container">
+                <h2 class="contact-title">Secure Comms</h2>
+                <p class="contact-subtitle">Perimeter breached. Encrypted channels open for dark pool comms, exploit trades, or high-stakes ops. Enter the grid.</p>
+                <div class="contact-links">
+                    <a href="https://linkedin.com/in/yourprofile" class="contact-link" target="_blank" rel="noopener noreferrer"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14zm-8.26 13.5h-2.47V9.79h2.47v6.71zm-1.24-7.6a1.48 1.48 0 1 0 0-2.96 1.48 1.48 0 0 0 0 2.96zm8.5 7.6h-2.47v-3.5c0-.84-.02-1.92-.94-1.92-.94 0-1.08.73-1.08 1.86v3.56H9.74V9.79h2.37v1.08h.03c.33-.62 1.13-1.27 2.34-1.27 2.5 0 2.96 1.64 2.96 3.78v4.33z"/></svg> LinkedIn </a>
+                    <a href="https://github.com/TheCyb3rKat1" class="contact-link" target="_blank" rel="noopener noreferrer"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.5.09.68-.22.68-.48 0-.24-.01-1.05-.01-1.9-2.78.6-3.37-1.19-3.37-1.19-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.64-1.34-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02A9.56 9.56 0 0 1 12 6.84c.85.01 1.7.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.85 0 1.34-.01 2.43-.01 2.76 0 .27.18.58.69.48A10.01 10.01 0 0 0 22 12c0-5.52-4.48-10-10-10z"/></svg> GitHub </a>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="container">
+                <p class="footer-text">SYSTEM STATUS: <span style="color: var(--accent);">INFILTRATED</span> | © <span id="current-year"></span> TheCyb3rKat // Unit ΔΚ</p>
+                <p class="footer-text">// Terminating secure connection...</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Global Settings
+        const settings = {
+            preloaderDuration: 2000,
+            welcomeMessage: "Welcome to my world..... MY HACKING WORLD!!",
+            typingRevealSpeed: 60,
+            matrixRainSpeed: 60,
+            matrixDensity: 0.95,
+            autoTransitionDelay: 3000
+        };
+
+        // Element Selection
+        const preloader = document.getElementById('preloader');
+        const mainContent = document.getElementById('main-content');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const typingTextElement = document.getElementById('typing-text');
+        const digitalWipe = document.querySelector('.digital-wipe');
+        const binaryPulse = document.querySelector('.binary-pulse');
+        const matrixCanvas = document.getElementById('matrixCanvas');
+        const matrixCtx = matrixCanvas?.getContext('2d');
+        const welcomeMatrixCanvas = document.getElementById('matrix-rain');
+        const welcomeMatrixCtx = welcomeMatrixCanvas?.getContext('2d');
+        const currentYearSpan = document.getElementById('current-year');
+        const hackerConsole = document.getElementById('hacker-console');
+        const hackModeToggle = document.getElementById('hack-mode-toggle');
+        const welcomeSound = document.getElementById('welcome-sound');
+        const securityPrompt = document.getElementById('security-prompt');
+        const securityResult = document.getElementById('security-result');
+
+        if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
+
+        // Security Prompt Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const soundOnBtn = document.getElementById('sound-on');
+            const noSoundBtn = document.getElementById('no-sound');
+
+            preloader.style.display = 'none'; // Hide preloader initially
+
+            soundOnBtn.addEventListener('click', () => {
+                welcomeSound.muted = false; // Enable sound
+                welcomeSound.volume = 0.7;
+                securityPrompt.style.display = 'none';
+                startLoadingSequence();
+            });
+
+            noSoundBtn.addEventListener('click', () => {
+                welcomeSound.muted = false; // Enable sound anyway
+                welcomeSound.volume = 0.7;
+                securityResult.textContent = "> HAHAHA YOU WISH...";
+                securityResult.classList.add('show');
+                setTimeout(() => {
+                    securityPrompt.style.display = 'none';
+                    startLoadingSequence();
+                }, 1000); // Show taunt for 1 second
+            });
+
+            window.playWelcomeSound = () => {
+                if (welcomeSound && !welcomeSound.muted) {
+                    welcomeSound.play().catch(error => console.error('Audio error:', error));
+                }
+            };
+        });
+
+        // Start Loading Sequence
+        function startLoadingSequence() {
+            preloader.style.display = 'flex';
+            setTimeout(() => {
+                preloader.classList.add('hidden');
+                welcomeScreen.classList.add('active');
+                binaryPulse.classList.add('animated');
+                setTimeout(() => {
+                    revealText(typingTextElement, settings.welcomeMessage, settings.typingRevealSpeed, () => {
+                        setTimeout(startAutoTransition, settings.autoTransitionDelay);
+                    });
+                }, 600);
+            }, settings.preloaderDuration);
+        }
+
+        // Hacker Console
+        function updateHackerConsole() {
+            if (!hackerConsole) return;
+            const lines = [];
+            for (let i = 0; i < 5; i++) {
+                lines.push(Math.random() > 0.5 ? "0x" + Math.random().toString(16).substr(2, 8).toUpperCase() : Array(10).fill(0).map(() => Math.round(Math.random())).join(""));
+            }
+            hackerConsole.textContent = lines.join("\n");
+            setTimeout(updateHackerConsole, 1000);
+        }
+        updateHackerConsole();
+
+        // Typing Reveal
+        function revealText(element, text, speed, callback) {
+            if (!element) return;
+            element.innerHTML = '';
+            const chars = text.split('');
+            let charIndex = 0;
+            window.playWelcomeSound();
+
+            function revealNext() {
+                if (charIndex < chars.length) {
+                    const span = document.createElement('span');
+                    span.textContent = chars[charIndex] === ' ' ? '\u00A0' : chars[charIndex];
+                    span.style.setProperty('--char-index', charIndex);
+                    element.appendChild(span);
+                    span.style.opacity = '1';
+                    span.style.transform = 'translateY(0)';
+                    charIndex++;
+                    setTimeout(revealNext, speed);
+                } else if (callback) {
+                    callback();
+                }
+            }
+            revealNext();
+        }
+
+        // Auto Transition
+        function startAutoTransition() {
+            digitalWipe.classList.add('active');
+            setTimeout(() => {
+                welcomeScreen.style.opacity = '0';
+                welcomeScreen.style.visibility = 'hidden';
+                if (window.welcomeMatrixIntervalId) cancelAnimationFrame(window.welcomeMatrixIntervalId);
+            }, 500);
+            setTimeout(() => {
+                mainContent.classList.add('show');
+                animations.triggerInitial();
+                digitalWipe.style.display = 'none';
+            }, 1500);
+        }
+
+        // Animations & Intersection Observer
+        const animations = {
+            observer: null,
+            options: { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.2 },
+            init: () => {
+                animations.observer = new IntersectionObserver(animations.onIntersect, animations.options);
+                document.querySelectorAll('.section, .skill-card, .project-card, .timeline-item, .contact-link, pre.ascii-art, footer, header nav li, .terminal, .subtitle').forEach(el => {
+                    if (!el.classList.contains('animated')) animations.observer.observe(el);
+                });
+            },
+            onIntersect: (entries, observer) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const delay = entry.target.matches('.skill-card, .project-card, .timeline-item, .contact-link, nav li') ? (parseInt(entry.target.dataset.index || '0', 10) % 6) * 150 : 0;
+                        setTimeout(() => entry.target.classList.add('animated'), delay);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            },
+            triggerInitial: () => {
+                document.querySelectorAll('.skill-card, .project-card, .timeline-item, .contact-link, nav li').forEach((el, i) => el.dataset.index = i);
+                document.querySelector('header')?.classList.add('animated');
+                const hero = document.querySelector('.hero');
+                if (hero) {
+                    hero.classList.add('animated');
+                    hero.querySelector('.scan-effect')?.classList.add('animated');
+                }
+                animations.init();
+            }
+        };
+
+        // Matrix Rain Animation
+        function setupMatrixRain(canvas, ctx, idStorage, _speed, density, isWelcomeScreen = false) {
+            if (!canvas || !ctx) return;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const letters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZαβγδεζηθικλμνξοπρστυφχψω<>[]{}()#$&*@';
+            const fontSize = 16;
+            const columns = canvas.width / fontSize;
+            const drops = Array.from({ length: Math.floor(columns) }, () => 1 + Math.random() * canvas.height / fontSize);
+            let lastTimestamp = 0;
+            const frameInterval = 1000 / settings.matrixRainSpeed;
+
+            function draw(timestamp) {
+                window[idStorage] = requestAnimationFrame(draw);
+                if (timestamp - lastTimestamp < frameInterval) return;
+                lastTimestamp = timestamp;
+
+                ctx.fillStyle = isWelcomeScreen ? 'rgba(2, 2, 2, 0.15)' : 'rgba(3, 3, 3, 0.08)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = letters[Math.floor(Math.random() * letters.length)];
+                    const brightness = isWelcomeScreen ? 0.9 : 0.7;
+                    ctx.fillStyle = Math.random() > 0.98 ? '#fff' : `rgba(0, 255, 65, ${brightness})`;
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    drops[i]++;
+                    if (drops[i] * fontSize > canvas.height && Math.random() > density) drops[i] = Math.random() * -50;
+                }
+            }
+            if (window[idStorage]) cancelAnimationFrame(window[idStorage]);
+            window[idStorage] = requestAnimationFrame(draw);
+        }
+
+        setupMatrixRain(matrixCanvas, matrixCtx, 'matrixIntervalId', settings.matrixRainSpeed + 10, settings.matrixDensity);
+        setupMatrixRain(welcomeMatrixCanvas, welcomeMatrixCtx, 'welcomeMatrixIntervalId', settings.matrixRainSpeed, settings.matrixDensity - 0.01, true);
+
+        // Resize Handler
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (window.matrixIntervalId) cancelAnimationFrame(window.matrixIntervalId);
+                if (window.welcomeMatrixIntervalId) cancelAnimationFrame(window.welcomeMatrixIntervalId);
+                setupMatrixRain(matrixCanvas, matrixCtx, 'matrixIntervalId', settings.matrixRainSpeed + 10, settings.matrixDensity);
+                if (welcomeScreen?.style.opacity !== '0') {
+                    setupMatrixRain(welcomeMatrixCanvas, welcomeMatrixCtx, 'welcomeMatrixIntervalId', settings.matrixRainSpeed, settings.matrixDensity - 0.01, true);
+                }
+            }, 200);
+        });
+
+        // Smooth Scrolling
+        document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    const headerOffset = document.querySelector('header')?.offsetHeight || 80;
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+                }
+            });
+        });
+
+        // Hack Mode Toggle
+        if (hackModeToggle) {
+            hackModeToggle.addEventListener('click', () => {
+                document.documentElement.classList.toggle('hack-mode');
+                welcomeScreen.classList.toggle('hacked-mode');
+            });
+        }
+    </script>
+</body>
+</html>
