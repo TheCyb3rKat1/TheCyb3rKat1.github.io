@@ -218,22 +218,62 @@
             --cinematic-bg: #000700;
         }
 
+        .security-prompt {
+            position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.95); display: flex; justify-content: center; align-items: center;
+        }
+        .security-content {
+            background-color: var(--darker-bg); padding: 25px; border: 2px solid var(--accent);
+            border-radius: 5px; box-shadow: 0 0 30px rgba(0, 255, 65, 0.4); width: 400px;
+            text-align: center; position: relative; animation: flickerBorder 0.5s infinite alternate;
+        }
+        @keyframes flickerBorder { 0% { border-color: var(--accent); } 50% { border-color: rgba(0, 255, 65, 0.6); } 100% { border-color: var(--accent); } }
+        .security-title { color: var(--accent); font-weight: bold; margin-bottom: 15px; font-size: 1.4rem; text-shadow: 0 0 10px var(--accent); animation: glitchText 2s infinite; }
+        @keyframes glitchText { 0%, 100% { transform: skew(0deg); } 10% { transform: skew(2deg); } 20% { transform: skew(-2deg); } }
+        .security-subtext { color: var(--text); font-size: 0.9rem; margin-bottom: 20px; }
+        .security-btn {
+            padding: 10px 20px; border: 1px solid var(--accent); background: none;
+            color: var(--accent); cursor: pointer; margin: 5px; transition: all 0.3s ease; font-size: 1rem;
+        }
+        .security-btn:hover { background: var(--accent); color: var(--dark-bg); box-shadow: 0 0 15px var(--accent); }
+        .security-btn.secondary { border-color: #ff3333; color: #ff3333; }
+        .security-btn.secondary:hover { background: #ff3333; color: #fff; }
+        .security-result { color: #ff3333; font-size: 1.1rem; margin-top: 10px; opacity: 0; transition: opacity 0.5s ease; font-weight: bold; text-shadow: 0 0 10px #ff3333; }
+        .security-result.show { opacity: 1; animation: glitchText 1s infinite; }
+        .scan-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(to right, transparent, var(--accent), transparent);
+            animation: scan 2s linear infinite;
+        }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+
         @media (max-width: 992px) { .skill-grid, .projects-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); } .container { max-width: 90%; } .glitch-title { font-size: 3.5rem; } .section-title { font-size: 2.5rem; } }
         @media (max-width: 768px) { header { background-color: rgba(3, 3, 3, 0.95); } .header-content { flex-direction: column; text-align: center; } nav ul { margin-top: 20px; justify-content: center; } nav li { margin: 0 15px; } nav a { padding: 6px 10px; font-size: 0.9rem; } .hero { padding: 100px 0 60px; } .glitch-title { font-size: 3rem; } .subtitle { font-size: 1.3rem; } .section-title { font-size: 2.2rem; } .skill-grid, .projects-grid { grid-template-columns: 1fr; } .exp-timeline::before { left: 15px; } .timeline-item { padding-left: 50px; } .timeline-item::before { left: 7px; } #typing-text { font-size: 1.8rem; } .contact-title { font-size: 2.5rem; } .contact-subtitle { font-size: 1.1rem; } .contact-link { padding: 12px 30px; } pre.ascii-art { font-size: 0.6rem; } }
-        @media (max-width: 480px) { .glitch-title { font-size: 2.5rem; } #typing-text { font-size: 1.5rem; } .logo { font-size: 2rem; } nav li { margin: 0 10px; } nav a { padding: 5px 8px; font-size: 0.8rem; } .section-title { font-size: 2rem; } .skill-title, .project-title { font-size: 1.4rem; } .timeline-title { font-size: 1.2rem; } .contact-title { font-size: 2.2rem; } .contact-subtitle { font-size: 1rem; } }
+        @media (max-width: 480px) { .glitch-title { font-size: 2.5rem; } #typing-text { font-size: 1.5rem; } .logo { font-size: 2rem; } nav li { margin: 0 10px; } nav a { padding: 5px 8px; font-size: 0.8rem; } .section-title { font-size: 2rem; } .skill-title, .project-title { font-size: 1.4rem; } .timeline-title { font-size: 1.2rem; } .contact-title { font-size: 2.2rem; } .contact-subtitle { font-size: 1rem; } .security-content { width: 90%; } }
     </style>
 </head>
 <body>
+    <div id="security-prompt" class="security-prompt">
+        <div class="security-content">
+            <div class="scan-line"></div>
+            <div class="security-title">> SECURITY PROTOCOL DETECTED</div>
+            <div class="security-subtext">> Audio infiltration in progress. Make your choice.</div>
+            <button id="sound-on" class="security-btn">> Sound On [Y]</button>
+            <button id="no-sound" class="security-btn secondary">> No Sound [N]</button>
+            <div id="security-result" class="security-result"></div>
+        </div>
+    </div>
+
     <audio id="welcome-sound" src="Female_hacker.mp3" preload="auto" style="display: none;"></audio>
 
     <div id="preloader">
         <div class="loader"></div>
-        <div class="loading-text">SYSTEM BOOT<span class="loading-animation"></span></div>
+        <div class="loading-text">SYS_BOOT<span class="loading-animation"></span></div>
         <div class="boot-log">
-            [  OK  ] Kernel loaded at 0xFF00<br>
-            [  OK  ] Mounting /dev/hack0...<br>
-            [INFO ] Initiating core protocols<br>
-            [  OK  ] Network interface up
+            [OK] Kernel @ 0xFF00<br>
+            [OK] Mount /dev/hack0<br>
+            [INFO] Core init<br>
+            [OK] Net up
         </div>
     </div>
 
@@ -294,7 +334,6 @@
         <section id="about" class="section">
             <div class="container">
                 <h2 class="section-title">Codename: ShadowTrace</h2>
-               
                 <p>Born in the shadows of digital networks, my existence is defined by the art of penetration and protection. From dismantling weak defenses in IT support to crafting exploits in my underground lab, I’ve evolved into a force of controlled chaos. My directive: breach the unbreachable, secure the vulnerable, and rewrite the rules of the game.</p>
                 <p>Current operations include live-fire CTF assaults (Hack The Box, OverTheWire), custom exploit development, and a relentless pursuit of knowledge through code and chaos. I don’t just hack systems—I hack perceptions. Welcome to the frontline.</p>
             </div>
@@ -354,7 +393,6 @@
         </footer>
     </div>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
     <script>
         // Global Settings
         const settings = {
@@ -381,16 +419,56 @@
         const hackerConsole = document.getElementById('hacker-console');
         const hackModeToggle = document.getElementById('hack-mode-toggle');
         const welcomeSound = document.getElementById('welcome-sound');
+        const securityPrompt = document.getElementById('security-prompt');
+        const securityResult = document.getElementById('security-result');
 
         if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
 
-        // Audio Playback Function
-        function playWelcomeSound() {
-            if (welcomeSound) {
-                welcomeSound.play().catch((error) => {
-                    console.error('Audio playback failed:', error);
-                });
-            }
+        // Security Prompt Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const soundOnBtn = document.getElementById('sound-on');
+            const noSoundBtn = document.getElementById('no-sound');
+
+            preloader.style.display = 'none'; // Hide preloader initially
+
+            soundOnBtn.addEventListener('click', () => {
+                welcomeSound.muted = false; // Enable sound
+                welcomeSound.volume = 0.7;
+                securityPrompt.style.display = 'none';
+                startLoadingSequence();
+            });
+
+            noSoundBtn.addEventListener('click', () => {
+                welcomeSound.muted = false; // Enable sound anyway
+                welcomeSound.volume = 0.7;
+                securityResult.textContent = "> HAHAHA YOU WISH...";
+                securityResult.classList.add('show');
+                setTimeout(() => {
+                    securityPrompt.style.display = 'none';
+                    startLoadingSequence();
+                }, 1000); // Show taunt for 1 second
+            });
+
+            window.playWelcomeSound = () => {
+                if (welcomeSound && !welcomeSound.muted) {
+                    welcomeSound.play().catch(error => console.error('Audio error:', error));
+                }
+            };
+        });
+
+        // Start Loading Sequence
+        function startLoadingSequence() {
+            preloader.style.display = 'flex';
+            setTimeout(() => {
+                preloader.classList.add('hidden');
+                welcomeScreen.classList.add('active');
+                binaryPulse.classList.add('animated');
+                setTimeout(() => {
+                    revealText(typingTextElement, settings.welcomeMessage, settings.typingRevealSpeed, () => {
+                        setTimeout(startAutoTransition, settings.autoTransitionDelay);
+                    });
+                }, 600);
+            }, settings.preloaderDuration);
         }
 
         // Hacker Console
@@ -405,15 +483,13 @@
         }
         updateHackerConsole();
 
-        // Typing Reveal with Audio Trigger
+        // Typing Reveal
         function revealText(element, text, speed, callback) {
             if (!element) return;
             element.innerHTML = '';
             const chars = text.split('');
             let charIndex = 0;
-
-            // Start audio when typing begins
-            playWelcomeSound();
+            window.playWelcomeSound();
 
             function revealNext() {
                 if (charIndex < chars.length) {
@@ -434,38 +510,18 @@
 
         // Auto Transition
         function startAutoTransition() {
-            if (!digitalWipe) return;
             digitalWipe.classList.add('active');
             setTimeout(() => {
-                if (welcomeScreen) {
-                    welcomeScreen.style.opacity = '0';
-                    welcomeScreen.style.visibility = 'hidden';
-                }
+                welcomeScreen.style.opacity = '0';
+                welcomeScreen.style.visibility = 'hidden';
                 if (window.welcomeMatrixIntervalId) cancelAnimationFrame(window.welcomeMatrixIntervalId);
             }, 500);
             setTimeout(() => {
-                if (mainContent) mainContent.classList.add('show');
+                mainContent.classList.add('show');
                 animations.triggerInitial();
-                digitalWipe.addEventListener('animationend', () => digitalWipe.style.display = 'none', { once: true });
-            }, 1000);
+                digitalWipe.style.display = 'none';
+            }, 1500);
         }
-
-        // Initial Load
-        window.addEventListener('load', () => {
-            if (!preloader) return;
-            setTimeout(() => {
-                preloader.classList.add('hidden');
-                preloader.addEventListener('transitionend', () => {
-                    welcomeScreen.classList.add('active');
-                    binaryPulse?.classList.add('animated');
-                    setTimeout(() => {
-                        revealText(typingTextElement, settings.welcomeMessage, settings.typingRevealSpeed, () => {
-                            setTimeout(startAutoTransition, settings.autoTransitionDelay);
-                        });
-                    }, 600);
-                }, { once: true });
-            }, settings.preloaderDuration);
-        });
 
         // Animations & Intersection Observer
         const animations = {
@@ -572,6 +628,5 @@
             });
         }
     </script>
-    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92c34dcff9e6dd24',t:'MTc0Mzk2MzY3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
